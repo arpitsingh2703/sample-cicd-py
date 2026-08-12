@@ -3,7 +3,7 @@ name: Build and Deploy to VM
 on:
   push:
     branches:
-      - main  # Triggers pipeline on push to main branch
+      - main
 
 jobs:
   build-and-push:
@@ -35,9 +35,10 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USERNAME }}
           key: ${{ secrets.VM_SSH_KEY }}
+          envs: DOCKERHUB_USERNAME,DOCKERHUB_TOKEN
           script: |
             # Authenticate with Docker Hub
-            docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+            echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
             
             # Pull latest image
             docker pull arpit277/python-web-app:latest
@@ -51,3 +52,6 @@ jobs:
             
             # Clean up old/unused Docker images
             docker image prune -f
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
